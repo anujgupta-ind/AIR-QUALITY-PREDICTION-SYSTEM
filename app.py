@@ -222,25 +222,25 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("### 📡 Live API Ingestion")
     api_key_status = get_openaq_api_key()
-    
-    user_key_input = st.text_input(
-        "OpenAQ API Key",
-        value=api_key_status or "",
-        type="password",
-        help="Free key from explore.openaq.org/register",
-        placeholder="Paste your key here...",
-    )
-    
-    if user_key_input and user_key_input.strip() and user_key_input != api_key_status:
-        import os
-        os.environ["OPENAQ_API_KEY"] = user_key_input.strip()
-        api_key_status = user_key_input.strip()
-        st.success("API Key updated in runtime session!")
 
     if api_key_status:
-        st.success("🔑 OpenAQ API Key Active")
+        st.success("🔒 Live API Connected (Secure)")
+        st.caption("Loaded securely from backend environment (`.env`).")
     else:
-        st.info("ℹ️ Using OpenAQ Official Archive")
+        st.info("ℹ️ Using OpenAQ Public Archive")
+        with st.expander("🔑 Set Custom API Key", expanded=False):
+            user_key_input = st.text_input(
+                "OpenAQ API Key",
+                value="",
+                type="password",
+                help="Free key from explore.openaq.org/register",
+                placeholder="Paste your key here...",
+            )
+            if user_key_input and user_key_input.strip():
+                import os
+                os.environ["OPENAQ_API_KEY"] = user_key_input.strip()
+                api_key_status = user_key_input.strip()
+                st.success("Key applied for this session!")
 
     if st.button("🔄 Refresh / Fetch Live Data", use_container_width=True):
         from src.data_collection.fetch_data import fetch_from_live_api, fetch_from_openaq_archive
