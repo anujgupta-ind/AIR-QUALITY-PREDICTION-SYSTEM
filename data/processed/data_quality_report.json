@@ -1,0 +1,87 @@
+{
+  "dataset_name": "Indian Cities PM2.5 Cleaned Dataset",
+  "data_source": "OpenAQ Open Air Quality Archive",
+  "total_raw_records": 3023,
+  "valid_cleaned_records": 3023,
+  "invalid_timestamps_dropped": 0,
+  "missing_values_dropped": 0,
+  "out_of_bounds_dropped": 0,
+  "duplicates_removed": 0,
+  "overall_temporal_completeness_pct": 85.3,
+  "overall_missing_hourly_pct": 14.7,
+  "city_count": 5,
+  "available_cities": [
+    "Chennai",
+    "Delhi",
+    "Hyderabad",
+    "Kolkata",
+    "Mumbai"
+  ],
+  "city_summaries": {
+    "Chennai": {
+      "station_id": 8558,
+      "station_name": "Chennai (US Diplomatic Post)",
+      "record_count": 680,
+      "start_time_ist": "2024-03-11 01:00:00",
+      "end_time_ist": "2024-04-10 00:00:00",
+      "expected_hourly_span": 720,
+      "missing_hours": 40,
+      "missing_percentage": 5.56,
+      "pm25_min": 1.0,
+      "pm25_mean": 21.32,
+      "pm25_max": 68.0
+    },
+    "Delhi": {
+      "station_id": 8118,
+      "station_name": "New Delhi (US Diplomatic Post)",
+      "record_count": 365,
+      "start_time_ist": "2024-03-11 01:00:00",
+      "end_time_ist": "2024-04-10 00:00:00",
+      "expected_hourly_span": 720,
+      "missing_hours": 355,
+      "missing_percentage": 49.31,
+      "pm25_min": 14.0,
+      "pm25_mean": 77.78,
+      "pm25_max": 305.0
+    },
+    "Hyderabad": {
+      "station_id": 8557,
+      "station_name": "Hyderabad (US Diplomatic Post)",
+      "record_count": 690,
+      "start_time_ist": "2024-03-11 01:00:00",
+      "end_time_ist": "2024-04-10 00:00:00",
+      "expected_hourly_span": 720,
+      "missing_hours": 30,
+      "missing_percentage": 4.17,
+      "pm25_min": 16.0,
+      "pm25_mean": 46.5,
+      "pm25_max": 106.0
+    },
+    "Kolkata": {
+      "station_id": 8172,
+      "station_name": "Kolkata (US Diplomatic Post)",
+      "record_count": 627,
+      "start_time_ist": "2024-03-22 09:00:00",
+      "end_time_ist": "2024-04-19 00:00:00",
+      "expected_hourly_span": 664,
+      "missing_hours": 37,
+      "missing_percentage": 5.57,
+      "pm25_min": 12.0,
+      "pm25_mean": 57.98,
+      "pm25_max": 156.0
+    },
+    "Mumbai": {
+      "station_id": 8039,
+      "station_name": "Mumbai (US Diplomatic Post)",
+      "record_count": 661,
+      "start_time_ist": "2024-03-11 01:00:00",
+      "end_time_ist": "2024-04-10 00:00:00",
+      "expected_hourly_span": 720,
+      "missing_hours": 59,
+      "missing_percentage": 8.19,
+      "pm25_min": 10.0,
+      "pm25_mean": 37.69,
+      "pm25_max": 115.0
+    }
+  }
+}

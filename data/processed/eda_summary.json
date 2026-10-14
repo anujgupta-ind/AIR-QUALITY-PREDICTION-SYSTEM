@@ -1,0 +1,71 @@
+{
+  "total_observations": 3023,
+  "time_span_start": "2024-03-11 01:00:00",
+  "time_span_end": "2024-04-19 00:00:00",
+  "overall_mean_pm25": 45.07,
+  "overall_median_pm25": 40.0,
+  "city_with_highest_mean": "Delhi",
+  "city_with_lowest_mean": "Chennai",
+  "cities": {
+    "Chennai": {
+      "record_count": 680,
+      "mean_pm25": 21.32,
+      "median_pm25": 19.0,
+      "std_dev": 10.4,
+      "min_pm25": 1.0,
+      "max_pm25": 68.0,
+      "p25": 13.0,
+      "p75": 28.0,
+      "peak_pollution_hour_ist": 8,
+      "lowest_pollution_hour_ist": 23
+    },
+    "Delhi": {
+      "record_count": 365,
+      "mean_pm25": 77.78,
+      "median_pm25": 66.0,
+      "std_dev": 47.01,
+      "min_pm25": 14.0,
+      "max_pm25": 305.0,
+      "p25": 47.0,
+      "p75": 95.0,
+      "peak_pollution_hour_ist": 7,
+      "lowest_pollution_hour_ist": 17
+    },
+    "Hyderabad": {
+      "record_count": 690,
+      "mean_pm25": 46.5,
+      "median_pm25": 45.0,
+      "std_dev": 13.08,
+      "min_pm25": 16.0,
+      "max_pm25": 106.0,
+      "p25": 38.0,
+      "p75": 54.75,
+      "peak_pollution_hour_ist": 20,
+      "lowest_pollution_hour_ist": 14
+    },
+    "Kolkata": {
+      "record_count": 627,
+      "mean_pm25": 57.98,
+      "median_pm25": 54.0,
+      "std_dev": 23.27,
+      "min_pm25": 12.0,
+      "max_pm25": 156.0,
+      "p25": 41.0,
+      "p75": 71.0,
+      "peak_pollution_hour_ist": 18,
+      "lowest_pollution_hour_ist": 5
+    },
+    "Mumbai": {
+      "record_count": 661,
+      "mean_pm25": 37.69,
+      "median_pm25": 36.0,
+      "std_dev": 14.94,
+      "min_pm25": 10.0,
+      "max_pm25": 115.0,
+      "p25": 26.0,
+      "p75": 46.0,
+      "peak_pollution_hour_ist": 9,
+      "lowest_pollution_hour_ist": 17
+    }
+  }
+}
