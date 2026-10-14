@@ -1,39 +1,78 @@
 {
-  "Delhi": {
-    "city": "Delhi",
-    "station_name": "Delhi Technological University, Delhi - CPCB",
-    "test_sample_count": 696,
+  "Chennai": {
+    "city": "Chennai",
+    "station_name": "Manali, Chennai - CPCB",
+    "test_sample_count": 72,
     "test_period": {
-      "start": "2025-02-25 10:00:00",
-      "end": "2025-03-13 09:00:00",
-      "samples": 696
+      "start": "2026-10-11 01:00:00",
+      "end": "2026-10-14 00:00:00",
+      "samples": 72
     },
     "metrics": {
       "random_forest": {
-        "mae": 17.07,
-        "rmse": 24.65,
-        "r2": 0.7254,
+        "mae": 5.73,
+        "rmse": 7.21,
+        "r2": 0.7311,
         "unit": "\u00b5g/m\u00b3"
       },
       "persistence_baseline": {
-        "mae": 18.43,
-        "rmse": 27.44,
-        "r2": 0.6598,
+        "mae": 4.71,
+        "rmse": 6.12,
+        "r2": 0.8063,
         "unit": "\u00b5g/m\u00b3"
       },
       "rolling_24h_baseline": {
-        "mae": 31.0,
-        "rmse": 41.68,
-        "r2": 0.2152,
+        "mae": 9.57,
+        "rmse": 11.32,
+        "r2": 0.3363,
         "unit": "\u00b5g/m\u00b3"
       }
     },
-    "residual_mean": -1.4,
-    "residual_std": 24.61,
+    "residual_mean": 2.62,
+    "residual_std": 6.71,
+    "top_features": [
+      "lag_1",
+      "lag_3",
+      "rolling_mean_3h",
+      "rolling_std_3h",
+      "lag_24"
+    ]
+  },
+  "Delhi": {
+    "city": "Delhi",
+    "station_name": "R K Puram, Delhi - DPCC",
+    "test_sample_count": 238,
+    "test_period": {
+      "start": "2026-10-10 12:00:00",
+      "end": "2026-10-14 00:00:00",
+      "samples": 238
+    },
+    "metrics": {
+      "random_forest": {
+        "mae": 20.19,
+        "rmse": 29.43,
+        "r2": 0.4347,
+        "unit": "\u00b5g/m\u00b3"
+      },
+      "persistence_baseline": {
+        "mae": 25.8,
+        "rmse": 37.73,
+        "r2": 0.0709,
+        "unit": "\u00b5g/m\u00b3"
+      },
+      "rolling_24h_baseline": {
+        "mae": 20.35,
+        "rmse": 30.87,
+        "r2": 0.3783,
+        "unit": "\u00b5g/m\u00b3"
+      }
+    },
+    "residual_mean": 4.72,
+    "residual_std": 29.05,
     "top_features": [
       "rolling_mean_3h",
       "rolling_mean_6h",
-      "lag_2",
+      "lag_3",
       "lag_1",
       "rolling_std_3h"
     ]
@@ -41,40 +80,40 @@
   "Hyderabad": {
     "city": "Hyderabad",
     "station_name": "Zoo Park, Hyderabad - TSPCB",
-    "test_sample_count": 185,
+    "test_sample_count": 61,
     "test_period": {
-      "start": "2016-03-31 19:30:00",
-      "end": "2016-04-07 15:00:00",
-      "samples": 185
+      "start": "2026-10-11 12:00:00",
+      "end": "2026-10-14 00:00:00",
+      "samples": 61
     },
     "metrics": {
       "random_forest": {
-        "mae": 4.87,
-        "rmse": 6.96,
-        "r2": 0.6672,
+        "mae": 3.9,
+        "rmse": 4.96,
+        "r2": 0.8009,
         "unit": "\u00b5g/m\u00b3"
       },
       "persistence_baseline": {
-        "mae": 4.78,
-        "rmse": 6.95,
-        "r2": 0.6681,
+        "mae": 5.26,
+        "rmse": 6.81,
+        "r2": 0.6241,
         "unit": "\u00b5g/m\u00b3"
       },
       "rolling_24h_baseline": {
-        "mae": 10.81,
-        "rmse": 12.98,
-        "r2": -0.1562,
+        "mae": 9.55,
+        "rmse": 11.08,
+        "r2": 0.0054,
         "unit": "\u00b5g/m\u00b3"
       }
     },
-    "residual_mean": -1.14,
-    "residual_std": 6.87,
+    "residual_mean": -0.31,
+    "residual_std": 4.95,
     "top_features": [
       "lag_1",
-      "rolling_mean_24h",
       "lag_2",
-      "lag_24",
-      "rolling_mean_6h"
+      "rolling_mean_24h",
+      "hour",
+      "lag_24"
     ]
   }
 }

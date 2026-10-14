@@ -1,9 +1,11 @@
 """
 Fetch real PM2.5 measurements from OpenAQ for Indian cities.
 Supports:
-1. Live OpenAQ API v3 querying when an authenticated API key is supplied.
-2. Direct access to OpenAQ's official open data archive on AWS S3 for Indian stations
-   (New Delhi, Mumbai, Kolkata, Hyderabad, Chennai) using concurrent downloading.
+1. Live OpenAQ API v3 querying for active Indian government DPCC/CPCB monitoring stations
+   (Anand Vihar, R K Puram, Punjabi Bagh, Zoo Park Hyderabad, Manali Chennai, etc.)
+   using an authenticated API key.
+2. Direct access to OpenAQ's official open data archive on AWS S3 for historical Indian stations
+   when an API key is not present.
 """
 
 from __future__ import annotations
@@ -40,7 +42,51 @@ from src.data_collection.openaq_client import (
 
 logger = get_logger("fetch_data")
 
-# Documented Indian reference stations in OpenAQ
+# Active Reference Ground Stations in OpenAQ API v3 with real-time reporting
+ACTIVE_LIVE_INDIAN_STATIONS = [
+    {
+        "city": "Delhi",
+        "station_id": 235,
+        "station_name": "Anand Vihar, New Delhi - DPCC",
+        "pm25_sensor_id": 12235610,
+        "latitude": 28.646835,
+        "longitude": 77.316032,
+    },
+    {
+        "city": "Delhi",
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "pm25_sensor_id": 12234787,
+        "latitude": 28.563262,
+        "longitude": 77.186937,
+    },
+    {
+        "city": "Delhi",
+        "station_id": 50,
+        "station_name": "Punjabi Bagh, Delhi - DPCC",
+        "pm25_sensor_id": 12234796,
+        "latitude": 28.674045,
+        "longitude": 77.131023,
+    },
+    {
+        "city": "Hyderabad",
+        "station_id": 407,
+        "station_name": "Zoo Park, Hyderabad - TSPCB",
+        "pm25_sensor_id": 12235583,
+        "latitude": 17.349698,
+        "longitude": 78.451437,
+    },
+    {
+        "city": "Chennai",
+        "station_id": 2586,
+        "station_name": "Manali, Chennai - CPCB",
+        "pm25_sensor_id": 12235653,
+        "latitude": 13.164344,
+        "longitude": 80.262846,
+    },
+]
+
+# Historical Indian reference stations in OpenAQ S3 Archive
 KNOWN_INDIAN_STATIONS = {
     "Delhi": {"location_id": 8118, "station_name": "New Delhi (US Diplomatic Post)", "city": "Delhi", "lat": 28.63576, "lon": 77.22445},
     "Mumbai": {"location_id": 8039, "station_name": "Mumbai (US Diplomatic Post)", "city": "Mumbai", "lat": 19.07283, "lon": 72.88261},
@@ -50,6 +96,93 @@ KNOWN_INDIAN_STATIONS = {
 }
 
 OPENAQ_S3_BASE = "https://openaq-data-archive.s3.amazonaws.com"
+
+
+def fetch_from_live_api(
+    client: OpenAQClient,
+    cities: list[str] | None = None,
+    days_history: int = 20,
+    output_filename: str = "openaq_pm25_raw.csv",
+) -> Path:
+    """
+    Query real-time live OpenAQ API v3 endpoints with date filtering to retrieve
+    the most recent continuous hourly measurements leading up to today.
+    """
+    logger.info("Connecting to live OpenAQ API v3 with active credentials...")
+    
+    now_utc = datetime.now(timezone.utc)
+    start_utc = now_utc - timedelta(days=days_history)
+    datetime_from_str = start_utc.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    logger.info(f"Targeting real-time observation window from {datetime_from_str} onwards...")
+
+    city_filter = [c.lower() for c in cities] if cities else []
+    target_stations = []
+    for st in ACTIVE_LIVE_INDIAN_STATIONS:
+        if city_filter:
+            if st["city"].lower() in city_filter:
+                target_stations.append(st)
+        else:
+            target_stations.append(st)
+
+    all_records = []
+
+    for station in target_stations:
+        st_name = station["station_name"]
+        st_city = station["city"]
+        sensor_id = station["pm25_sensor_id"]
+        loc_id = station["station_id"]
+
+        logger.info(f"Querying live sensor {sensor_id} for '{st_name}' ({st_city})...")
+        
+        try:
+            # Query hourly aggregates starting from datetime_from_str
+            records = client.get_sensor_hourly_measurements(
+                sensor_id=sensor_id,
+                datetime_from=datetime_from_str,
+                limit=1000,
+            )
+            count = 0
+            for rec in records:
+                val = rec.get("value")
+                if val is None or float(val) < 0:
+                    continue
+
+                period = rec.get("period", {}) or {}
+                dt_to = period.get("datetimeTo", {}) or {}
+                dt_from = period.get("datetimeFrom", {}) or {}
+                utc_str = dt_to.get("utc") or dt_from.get("utc") or rec.get("datetime")
+                loc_str = dt_to.get("local") or dt_from.get("local")
+
+                all_records.append({
+                    "station_id": loc_id,
+                    "station_name": st_name,
+                    "city": st_city,
+                    "sensor_id": sensor_id,
+                    "pollutant": POLLUTANT_NAME,
+                    "unit": STANDARD_UNIT,
+                    "timestamp_utc": utc_str,
+                    "timestamp_local": loc_str,
+                    "value": float(val),
+                    "latitude": station["latitude"],
+                    "longitude": station["longitude"],
+                })
+                count += 1
+            logger.info(f"  Retrieved {count} live hourly records for '{st_name}'.")
+
+        except Exception as e:
+            logger.warning(f"  Error querying sensor {sensor_id}: {e}")
+
+    if not all_records:
+        logger.warning("No records returned from primary live sensors. Falling back to S3 archive.")
+        return fetch_from_openaq_archive(cities=cities, days_per_station=days_history, output_filename=output_filename)
+
+    df = pd.DataFrame(all_records)
+    output_path = RAW_DATA_DIR / output_filename
+    df.to_csv(output_path, index=False)
+    logger.info(f"Successfully collected {len(df)} live observations across {len(target_stations)} Indian stations.")
+    logger.info(f"Saved live dataset to: {output_path}")
+    return output_path
 
 
 def _download_and_parse_day(s3_key: str, st_info: dict, city_name: str) -> list[dict]:
@@ -111,7 +244,6 @@ def fetch_from_openaq_archive(
         loc_id = st_info["location_id"]
         logger.info(f"Querying OpenAQ archive for {city_name} (ID: {loc_id}, Station: '{st_info['station_name']}')...")
 
-        # Discover keys (check provider=airnow prefix first, then direct locationid)
         keys = []
         for prefix in [
             f"records/csv.gz/provider=airnow/country=in/locationid={loc_id}/year=2024/",
@@ -199,116 +331,22 @@ def parse_openaq_hourly_record(record: dict, station_meta: dict, sensor_meta: di
         return None
 
 
-def extract_city_from_station(station: dict) -> str:
-    """Extract standard Indian city name from station metadata or name string."""
-    locality = str(station.get("locality") or "").strip()
-    name = str(station.get("name") or "").strip()
-    combined = f"{locality} {name}".lower()
-
-    city_map = {
-        "delhi": "Delhi",
-        "new delhi": "Delhi",
-        "mumbai": "Mumbai",
-        "kolkata": "Kolkata",
-        "hyderabad": "Hyderabad",
-        "chennai": "Chennai",
-        "bengaluru": "Bengaluru",
-        "bangalore": "Bengaluru",
-        "gurugram": "Gurugram",
-        "noida": "Noida",
-        "agra": "Agra",
-        "lucknow": "Lucknow",
-        "pune": "Pune",
-        "kanpur": "Kanpur",
-    }
-    for key, city in city_map.items():
-        if key in combined:
-            return city
-    return locality.capitalize() if locality else "India"
-
-
-def fetch_from_live_api(
-    client: OpenAQClient,
-    cities: list[str] | None = None,
-    days_history: int = 45,
-    output_filename: str = "openaq_pm25_raw.csv",
-) -> Path:
-    """
-    Discover Indian stations via authenticated OpenAQ API v3, fetch active PM2.5 sensor observations,
-    and save them locally.
-    """
-    logger.info("Connecting to live OpenAQ API v3 for Indian monitoring stations...")
-    locations = client.get_locations(country=COUNTRY_CODE, limit=100)
-    logger.info(f"Retrieved {len(locations)} monitoring stations in India.")
-
-    if not locations:
-        raise OpenAQDataNotFoundError("No monitoring locations returned for India.")
-
-    target_cities = [c.lower() for c in (cities or ["Delhi", "Mumbai", "Kolkata", "Hyderabad", "Chennai"])]
-
-    # Select stations matching requested cities
-    matched_stations = []
-    for loc in locations:
-        resolved_city = extract_city_from_station(loc)
-        if resolved_city.lower() in target_cities:
-            matched_stations.append((resolved_city, loc))
-
-    logger.info(f"Identified {len(matched_stations)} monitoring stations matching target cities.")
-    if not matched_stations:
-        matched_stations = [(extract_city_from_station(l), l) for l in locations[:15]]
-
-    all_records = []
-    for city_name, station in matched_stations[:10]:
-        station_id = station.get("id")
-        station_name = station.get("name")
-        logger.info(f"Inspecting station '{station_name}' (ID: {station_id}, City: {city_name})...")
-        pm25_sensor = client.find_pm25_sensor(station_id)
-        if not pm25_sensor:
-            continue
-
-        sensor_id = pm25_sensor.get("id")
-        logger.info(f"  Found live PM2.5 sensor ID: {sensor_id}. Fetching hourly records...")
-        
-        try:
-            records = client.get_sensor_hourly_measurements(sensor_id=sensor_id, limit=500)
-            station_count = 0
-            for rec in records:
-                parsed = parse_openaq_hourly_record(rec, station, pm25_sensor)
-                if parsed:
-                    parsed["city"] = city_name
-                    all_records.append(parsed)
-                    station_count += 1
-            logger.info(f"  Retrieved {station_count} hourly records for '{station_name}'.")
-        except Exception as e:
-            logger.warning(f"  Could not retrieve records for sensor {sensor_id}: {e}")
-
-    if len(all_records) < 50:
-        logger.warning("Live API query returned fewer than 50 observations. Supplementing with OpenAQ archive records...")
-        return fetch_from_openaq_archive(cities=cities, days_per_station=days_history, output_filename=output_filename)
-
-    df = pd.DataFrame(all_records)
-    output_path = RAW_DATA_DIR / output_filename
-    df.to_csv(output_path, index=False)
-    logger.info(f"Saved {len(df)} live OpenAQ records to: {output_path}")
-    return output_path
-
-
 def main():
     parser = argparse.ArgumentParser(description="Fetch real PM2.5 data from OpenAQ for Indian cities.")
     parser.add_argument(
         "--cities",
         nargs="+",
-        default=["Delhi", "Mumbai", "Kolkata", "Hyderabad", "Chennai"],
+        default=["Delhi", "Hyderabad", "Chennai"],
         help="List of Indian cities to query",
     )
-    parser.add_argument("--days", type=int, default=45, help="Number of days to fetch")
+    parser.add_argument("--days", type=int, default=20, help="Number of past days to fetch")
     parser.add_argument("--output", type=str, default="openaq_pm25_raw.csv", help="Output CSV filename")
-    parser.add_argument("--force-live", action="store_true", help="Force querying live API even if key is missing")
+    parser.add_argument("--force-archive", action="store_true", help="Force querying S3 archive instead of live API")
     args = parser.parse_args()
 
     api_key = get_openaq_api_key()
 
-    if api_key and not args.force_live:
+    if api_key and not args.force_archive:
         logger.info("Detected OPENAQ_API_KEY. Using live OpenAQ API v3 client.")
         client = OpenAQClient(api_key=api_key)
         try:
