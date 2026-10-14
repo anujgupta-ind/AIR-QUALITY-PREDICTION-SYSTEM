@@ -220,11 +220,47 @@ with st.sidebar:
     st.info(f"**Station:** {station_name}")
 
     st.markdown("---")
+    st.markdown("### 📡 Live API Ingestion")
     api_key_status = get_openaq_api_key()
+    
+    user_key_input = st.text_input(
+        "OpenAQ API Key",
+        value=api_key_status or "",
+        type="password",
+        help="Free key from explore.openaq.org/register",
+        placeholder="Paste your key here...",
+    )
+    
+    if user_key_input and user_key_input.strip() and user_key_input != api_key_status:
+        import os
+        os.environ["OPENAQ_API_KEY"] = user_key_input.strip()
+        api_key_status = user_key_input.strip()
+        st.success("API Key updated in runtime session!")
+
     if api_key_status:
         st.success("🔑 OpenAQ API Key Active")
     else:
-        st.warning("⚠️ No API Key in .env (Using OpenAQ Archive)")
+        st.info("ℹ️ Using OpenAQ Official Archive")
+
+    if st.button("🔄 Refresh / Fetch Live Data", use_container_width=True):
+        from src.data_collection.fetch_data import fetch_from_live_api, fetch_from_openaq_archive
+        from src.data_collection.openaq_client import OpenAQClient
+        from src.data_processing.clean_data import clean_air_quality_data
+        
+        with st.spinner("Connecting to OpenAQ & ingesting latest measurements..."):
+            try:
+                if api_key_status:
+                    client = OpenAQClient(api_key=api_key_status)
+                    fetch_from_live_api(client, days_history=30)
+                else:
+                    fetch_from_openaq_archive(days_per_station=30)
+                
+                clean_air_quality_data(RAW_DATA_DIR / "openaq_pm25_raw.csv")
+                st.cache_data.clear()
+                st.success("Successfully updated measurements!")
+                st.rerun()
+            except Exception as e:
+                st.error(f"Live fetch failed: {e}")
 
     st.caption("Data Source: [OpenAQ Platform](https://openaq.org/)")
 
