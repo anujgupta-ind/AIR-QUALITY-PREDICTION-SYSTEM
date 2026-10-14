@@ -47,11 +47,25 @@ def run_full_evaluation(cleaned_csv_path: Path | str | None = None) -> dict:
     cities = sorted(df["city"].unique())
 
     evaluation_report = {}
-    fig, axes = plt.subplots(len(cities), 2, figsize=(14, 3.5 * len(cities)))
-    if len(cities) == 1:
+    valid_cities = []
+    for city in cities:
+        df_city = df[df["city"] == city]
+        slug = city.lower().replace(" ", "_")
+        model_path = MODELS_DIR / f"rf_model_{slug}.joblib"
+        if len(df_city) >= 72 and model_path.exists():
+            valid_cities.append(city)
+        else:
+            logger.info(f"Skipping evaluation for '{city}': insufficient records or no trained model.")
+
+    if not valid_cities:
+        logger.warning("No cities with sufficient records to evaluate.")
+        return {}
+
+    fig, axes = plt.subplots(len(valid_cities), 2, figsize=(14, 3.5 * len(valid_cities)))
+    if len(valid_cities) == 1:
         axes = np.array([axes])
 
-    for i, city in enumerate(cities):
+    for i, city in enumerate(valid_cities):
         artifact = load_model_artifact(city)
         model = artifact["model"]
 

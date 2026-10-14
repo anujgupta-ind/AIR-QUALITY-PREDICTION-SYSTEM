@@ -1,212 +1,86 @@
 {
-  "Chennai": {
-    "city": "Chennai",
-    "station_name": "Chennai (US Diplomatic Post)",
-    "training_period": {
-      "start": "2024-03-12 02:00:00",
-      "end": "2024-04-04 06:00:00",
-      "samples": 524
-    },
-    "testing_period": {
-      "start": "2024-04-04 07:00:00",
-      "end": "2024-04-10 00:00:00",
-      "samples": 132
-    },
-    "metrics": {
-      "random_forest": {
-        "mae": 2.81,
-        "rmse": 3.88,
-        "r2": 0.7284,
-        "unit": "\u00b5g/m\u00b3"
-      },
-      "persistence_baseline": {
-        "mae": 2.99,
-        "rmse": 4.22,
-        "r2": 0.6787,
-        "unit": "\u00b5g/m\u00b3"
-      },
-      "rolling_24h_baseline": {
-        "mae": 4.09,
-        "rmse": 5.56,
-        "r2": 0.4417,
-        "unit": "\u00b5g/m\u00b3"
-      }
-    },
-    "top_features": [
-      "lag_1",
-      "rolling_mean_3h",
-      "hour_sin",
-      "rolling_mean_24h",
-      "rolling_mean_6h"
-    ],
-    "model_path": "C:\\Users\\ANUJ\\antigravity_projects\\air-quality-prediction\\models\\rf_model_chennai.joblib"
-  },
   "Delhi": {
     "city": "Delhi",
-    "station_name": "New Delhi (US Diplomatic Post)",
+    "station_name": "Delhi Technological University, Delhi - CPCB",
     "training_period": {
-      "start": "2024-03-12 02:00:00",
-      "end": "2024-03-27 05:00:00",
-      "samples": 272
+      "start": "2016-02-06 07:30:00",
+      "end": "2025-02-25 09:00:00",
+      "samples": 2780
     },
     "testing_period": {
-      "start": "2024-03-27 07:00:00",
-      "end": "2024-04-10 00:00:00",
-      "samples": 69
+      "start": "2025-02-25 10:00:00",
+      "end": "2025-03-13 09:00:00",
+      "samples": 696
     },
     "metrics": {
       "random_forest": {
-        "mae": 16.37,
-        "rmse": 21.08,
-        "r2": 0.4812,
+        "mae": 17.07,
+        "rmse": 24.65,
+        "r2": 0.7254,
         "unit": "\u00b5g/m\u00b3"
       },
       "persistence_baseline": {
-        "mae": 20.01,
-        "rmse": 28.83,
-        "r2": 0.03,
+        "mae": 18.43,
+        "rmse": 27.44,
+        "r2": 0.6598,
         "unit": "\u00b5g/m\u00b3"
       },
       "rolling_24h_baseline": {
-        "mae": 26.62,
-        "rmse": 31.8,
-        "r2": -0.1801,
+        "mae": 31.0,
+        "rmse": 41.68,
+        "r2": 0.2152,
         "unit": "\u00b5g/m\u00b3"
       }
     },
     "top_features": [
+      "rolling_mean_3h",
+      "rolling_mean_6h",
+      "lag_2",
       "lag_1",
-      "hour_sin",
-      "hour",
-      "rolling_mean_24h",
-      "rolling_mean_3h"
+      "rolling_std_3h"
     ],
     "model_path": "C:\\Users\\ANUJ\\antigravity_projects\\air-quality-prediction\\models\\rf_model_delhi.joblib"
   },
   "Hyderabad": {
     "city": "Hyderabad",
-    "station_name": "Hyderabad (US Diplomatic Post)",
+    "station_name": "Zoo Park, Hyderabad - TSPCB",
     "training_period": {
-      "start": "2024-03-12 02:00:00",
-      "end": "2024-04-04 04:00:00",
-      "samples": 532
+      "start": "2016-01-30 20:00:00",
+      "end": "2016-03-31 19:00:00",
+      "samples": 738
     },
     "testing_period": {
-      "start": "2024-04-04 05:00:00",
-      "end": "2024-04-10 00:00:00",
-      "samples": 134
+      "start": "2016-03-31 19:30:00",
+      "end": "2016-04-07 15:00:00",
+      "samples": 185
     },
     "metrics": {
       "random_forest": {
-        "mae": 4.99,
-        "rmse": 6.42,
-        "r2": 0.7427,
+        "mae": 4.87,
+        "rmse": 6.96,
+        "r2": 0.6672,
         "unit": "\u00b5g/m\u00b3"
       },
       "persistence_baseline": {
-        "mae": 5.22,
-        "rmse": 6.85,
-        "r2": 0.7068,
+        "mae": 4.78,
+        "rmse": 6.95,
+        "r2": 0.6681,
         "unit": "\u00b5g/m\u00b3"
       },
       "rolling_24h_baseline": {
-        "mae": 9.51,
-        "rmse": 12.32,
-        "r2": 0.0515,
+        "mae": 10.81,
+        "rmse": 12.98,
+        "r2": -0.1562,
         "unit": "\u00b5g/m\u00b3"
       }
     },
     "top_features": [
       "lag_1",
-      "hour_sin",
       "rolling_mean_24h",
-      "rolling_mean_3h",
-      "lag_24"
+      "lag_2",
+      "lag_24",
+      "rolling_mean_6h"
     ],
     "model_path": "C:\\Users\\ANUJ\\antigravity_projects\\air-quality-prediction\\models\\rf_model_hyderabad.joblib"
-  },
-  "Kolkata": {
-    "city": "Kolkata",
-    "station_name": "Kolkata (US Diplomatic Post)",
-    "training_period": {
-      "start": "2024-03-23 09:00:00",
-      "end": "2024-04-13 12:00:00",
-      "samples": 482
-    },
-    "testing_period": {
-      "start": "2024-04-13 15:00:00",
-      "end": "2024-04-19 00:00:00",
-      "samples": 121
-    },
-    "metrics": {
-      "random_forest": {
-        "mae": 7.4,
-        "rmse": 10.97,
-        "r2": 0.5209,
-        "unit": "\u00b5g/m\u00b3"
-      },
-      "persistence_baseline": {
-        "mae": 7.67,
-        "rmse": 11.45,
-        "r2": 0.4783,
-        "unit": "\u00b5g/m\u00b3"
-      },
-      "rolling_24h_baseline": {
-        "mae": 12.84,
-        "rmse": 15.93,
-        "r2": -0.011,
-        "unit": "\u00b5g/m\u00b3"
-      }
-    },
-    "top_features": [
-      "lag_1",
-      "rolling_mean_3h",
-      "rolling_mean_24h",
-      "hour_cos",
-      "lag_24"
-    ],
-    "model_path": "C:\\Users\\ANUJ\\antigravity_projects\\air-quality-prediction\\models\\rf_model_kolkata.joblib"
-  },
-  "Mumbai": {
-    "city": "Mumbai",
-    "station_name": "Mumbai (US Diplomatic Post)",
-    "training_period": {
-      "start": "2024-03-12 02:00:00",
-      "end": "2024-04-04 11:00:00",
-      "samples": 509
-    },
-    "testing_period": {
-      "start": "2024-04-04 12:00:00",
-      "end": "2024-04-10 00:00:00",
-      "samples": 128
-    },
-    "metrics": {
-      "random_forest": {
-        "mae": 6.01,
-        "rmse": 8.4,
-        "r2": 0.3442,
-        "unit": "\u00b5g/m\u00b3"
-      },
-      "persistence_baseline": {
-        "mae": 5.45,
-        "rmse": 7.78,
-        "r2": 0.4371,
-        "unit": "\u00b5g/m\u00b3"
-      },
-      "rolling_24h_baseline": {
-        "mae": 7.76,
-        "rmse": 10.25,
-        "r2": 0.0227,
-        "unit": "\u00b5g/m\u00b3"
-      }
-    },
-    "top_features": [
-      "lag_1",
-      "rolling_std_3h",
-      "rolling_mean_3h",
-      "lag_24",
-      "rolling_mean_24h"
-    ],
-    "model_path": "C:\\Users\\ANUJ\\antigravity_projects\\air-quality-prediction\\models\\rf_model_mumbai.joblib"
   }
 }

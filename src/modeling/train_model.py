@@ -152,6 +152,15 @@ def train_all_models(cleaned_csv_path: Path | str | None = None) -> dict:
 
     all_results = {}
     for city in cities:
+        df_city = df[df["city"] == city]
+        if len(df_city) < 72:
+            logger.warning(
+                f"Skipping model training for '{city}': Insufficient historical records "
+                f"({len(df_city)} observations, requires >= 72 for reliable training). "
+                "OpenAQ does not have enough historical data for this station."
+            )
+            continue
+
         bundle = train_and_evaluate_city_model(df, city=city)
         # Store metadata without the raw model object for JSON export
         all_results[city] = {

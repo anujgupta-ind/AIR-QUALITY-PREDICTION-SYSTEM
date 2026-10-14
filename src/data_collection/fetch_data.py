@@ -199,6 +199,34 @@ def parse_openaq_hourly_record(record: dict, station_meta: dict, sensor_meta: di
         return None
 
 
+def extract_city_from_station(station: dict) -> str:
+    """Extract standard Indian city name from station metadata or name string."""
+    locality = str(station.get("locality") or "").strip()
+    name = str(station.get("name") or "").strip()
+    combined = f"{locality} {name}".lower()
+
+    city_map = {
+        "delhi": "Delhi",
+        "new delhi": "Delhi",
+        "mumbai": "Mumbai",
+        "kolkata": "Kolkata",
+        "hyderabad": "Hyderabad",
+        "chennai": "Chennai",
+        "bengaluru": "Bengaluru",
+        "bangalore": "Bengaluru",
+        "gurugram": "Gurugram",
+        "noida": "Noida",
+        "agra": "Agra",
+        "lucknow": "Lucknow",
+        "pune": "Pune",
+        "kanpur": "Kanpur",
+    }
+    for key, city in city_map.items():
+        if key in combined:
+            return city
+    return locality.capitalize() if locality else "India"
+
+
 def fetch_from_live_api(
     client: OpenAQClient,
     cities: list[str] | None = None,
@@ -216,61 +244,47 @@ def fetch_from_live_api(
     if not locations:
         raise OpenAQDataNotFoundError("No monitoring locations returned for India.")
 
-    city_filter = [c.lower() for c in cities] if cities else []
-    selected_stations = []
+    target_cities = [c.lower() for c in (cities or ["Delhi", "Mumbai", "Kolkata", "Hyderabad", "Chennai"])]
+
+    # Select stations matching requested cities
+    matched_stations = []
     for loc in locations:
-        loc_city = str(loc.get("locality") or loc.get("city") or "").strip().lower()
-        loc_name = str(loc.get("name") or "").strip().lower()
-        if city_filter:
-            if any(c in loc_city or c in loc_name for c in city_filter):
-                selected_stations.append(loc)
-        else:
-            selected_stations.append(loc)
+        resolved_city = extract_city_from_station(loc)
+        if resolved_city.lower() in target_cities:
+            matched_stations.append((resolved_city, loc))
 
-    if not selected_stations:
-        logger.warning("No stations matched the requested city filter. Falling back to first available stations.")
-        selected_stations = locations[:10]
-
-    now_utc = datetime.now(timezone.utc)
-    start_utc = now_utc - timedelta(days=days_history)
-    datetime_from_str = start_utc.strftime("%Y-%m-%dT%H:%M:%SZ")
-    datetime_to_str = now_utc.strftime("%Y-%m-%dT%H:%M:%SZ")
+    logger.info(f"Identified {len(matched_stations)} monitoring stations matching target cities.")
+    if not matched_stations:
+        matched_stations = [(extract_city_from_station(l), l) for l in locations[:15]]
 
     all_records = []
-    for idx, station in enumerate(selected_stations, 1):
+    for city_name, station in matched_stations[:10]:
         station_id = station.get("id")
         station_name = station.get("name")
-        logger.info(f"[{idx}/{len(selected_stations)}] Inspecting station '{station_name}' (ID: {station_id})...")
+        logger.info(f"Inspecting station '{station_name}' (ID: {station_id}, City: {city_name})...")
         pm25_sensor = client.find_pm25_sensor(station_id)
         if not pm25_sensor:
             continue
 
         sensor_id = pm25_sensor.get("id")
-        page = 1
-        station_record_count = 0
-        while True:
-            records = client.get_sensor_hourly_measurements(
-                sensor_id=sensor_id,
-                datetime_from=datetime_from_str,
-                datetime_to=datetime_to_str,
-                limit=1000,
-                page=page,
-            )
-            if not records:
-                break
+        logger.info(f"  Found live PM2.5 sensor ID: {sensor_id}. Fetching hourly records...")
+        
+        try:
+            records = client.get_sensor_hourly_measurements(sensor_id=sensor_id, limit=500)
+            station_count = 0
             for rec in records:
                 parsed = parse_openaq_hourly_record(rec, station, pm25_sensor)
                 if parsed:
+                    parsed["city"] = city_name
                     all_records.append(parsed)
-                    station_record_count += 1
-            if len(records) < 1000 or page >= 10:
-                break
-            page += 1
+                    station_count += 1
+            logger.info(f"  Retrieved {station_count} hourly records for '{station_name}'.")
+        except Exception as e:
+            logger.warning(f"  Could not retrieve records for sensor {sensor_id}: {e}")
 
-        logger.info(f"  Retrieved {station_record_count} valid hourly records for '{station_name}'.")
-
-    if not all_records:
-        raise OpenAQDataNotFoundError("No historical PM2.5 observations could be collected from the queried stations.")
+    if len(all_records) < 50:
+        logger.warning("Live API query returned fewer than 50 observations. Supplementing with OpenAQ archive records...")
+        return fetch_from_openaq_archive(cities=cities, days_per_station=days_history, output_filename=output_filename)
 
     df = pd.DataFrame(all_records)
     output_path = RAW_DATA_DIR / output_filename
