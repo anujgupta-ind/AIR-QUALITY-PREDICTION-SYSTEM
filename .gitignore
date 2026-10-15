@@ -43,13 +43,11 @@ venv/
 .coverage
 htmlcov/
 
-# Data & Models (Keep small sample/demo files if needed, ignore large raw artifacts)
-data/raw/*.csv
-!data/raw/.gitkeep
-data/processed/*.csv
-!data/processed/.gitkeep
-models/*.joblib
-!models/.gitkeep
+# Data & Models (Track essential application datasets and models for cloud deployment)
+!data/raw/openaq_pm25_raw.csv
+!data/processed/cleaned_pm25_hourly.csv
+!models/*.joblib
+
 
 # OS generated files
 .DS_Store
