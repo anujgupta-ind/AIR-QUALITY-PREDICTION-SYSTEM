@@ -540,7 +540,7 @@ if page == "🏠 Live & Latest Status":
                         unsafe_allow_html=True,
                     )
 
-        st.info("💡 **Deep Dive Available:** Complete 24-step hour-by-hour table, specific health advisories, aur downloadable forecast CSV ke liye left sidebar mein **'🔮 24-Hour AI Forecast'** page open karein.")
+        st.info("💡 **Detailed 24-Hour Breakdown:** View the complete hourly prediction table, health advisories, and exportable CSV data under the **'🔮 24-Hour AI Forecast'** navigation tab.")
 
     except Exception as e:
         st.warning(f"Could not compute real-time forecast for {selected_city}: {e}")
