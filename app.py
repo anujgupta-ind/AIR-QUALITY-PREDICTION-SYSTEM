@@ -43,8 +43,8 @@ from src.utils.config import (
 
 # Page configuration
 st.set_page_config(
-    page_title="Indian Air Quality AI Forecast & Alert System",
-    page_icon="🌍",
+    page_title="AirSense India — AI Air Quality Forecast & Alert System",
+    page_icon="🌿",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -194,8 +194,8 @@ cities_available = sorted(df_all["city"].unique().tolist())
 
 # --- SIDEBAR CONTROLS ---
 with st.sidebar:
-    st.markdown("## 🌍 Air Quality AI System")
-    st.caption("Real Indian Monitoring Stations (OpenAQ)")
+    st.markdown("## 🌿 AirSense India AI")
+    st.caption("Real-Time Indian Air Quality & 24h Forecasting Engine")
 
     st.markdown("---")
     page = st.radio(
