@@ -1,8 +1,7 @@
 FROM python:3.12-slim
 
 ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    PORT=8501
+    PYTHONDONTWRITEBYTECODE=1
 
 WORKDIR /app
 
@@ -18,4 +17,4 @@ COPY . .
 
 EXPOSE 8501
 
-CMD ["sh", "-c", "streamlit run app.py --server.port=${PORT:-8501} --server.address=0.0.0.0 --server.headless=true --server.enableCORS=false --server.enableXsrfProtection=false"]
+CMD ["python", "run.py"]
